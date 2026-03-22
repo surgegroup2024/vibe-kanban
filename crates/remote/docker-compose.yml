@@ -1,5 +1,6 @@
-# Self-hosting: set PUBLIC_BASE_URL to your public URL (e.g. https://kanban.example.com)
-# and REMOTE_SERVER_PORTS=0.0.0.0:3000:8081 so the server is reachable from other hosts.
+# AWS EC2 / Self-hosting: set PUBLIC_BASE_URL to your domain or public IP (e.g. http://1.2.3.4:3000 or https://kanban.example.com)
+# Ports are bound to 0.0.0.0 by default so the server is reachable from other hosts.
+# Required: copy .env.remote.example to .env.remote and set PUBLIC_BASE_URL and VIBEKANBAN_REMOTE_JWT_SECRET.
 services:
   remote-db:
     image: postgres:16-alpine
@@ -77,7 +78,7 @@ services:
         POSTHOG_API_KEY: ${POSTHOG_API_KEY:-}
         POSTHOG_API_ENDPOINT: ${POSTHOG_API_ENDPOINT:-}
         SENTRY_DSN_REMOTE: ${SENTRY_DSN_REMOTE:-}
-        VITE_RELAY_API_BASE_URL: ${VITE_RELAY_API_BASE_URL:-http://localhost:8082}
+        VITE_RELAY_API_BASE_URL: ${VITE_RELAY_API_BASE_URL:-${PUBLIC_BASE_URL}:8082}
         VITE_PUBLIC_REACT_VIRTUOSO_LICENSE_KEY: ${VITE_PUBLIC_REACT_VIRTUOSO_LICENSE_KEY:-}
       ssh:
         - default
@@ -100,7 +101,7 @@ services:
       VIBEKANBAN_REMOTE_JWT_SECRET: ${VIBEKANBAN_REMOTE_JWT_SECRET:?set in .env.remote}
       # Optional — leave empty to disable invitation emails
       LOOPS_EMAIL_API_KEY: ${LOOPS_EMAIL_API_KEY:-}
-      SERVER_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      SERVER_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL must be set to your domain or EC2 public IP (e.g. http://1.2.3.4:3000)}
       ELECTRIC_ROLE_PASSWORD: ${ELECTRIC_ROLE_PASSWORD:-remote}
       R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
       R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
@@ -124,7 +125,7 @@ services:
       AZURE_STORAGE_PUBLIC_ENDPOINT_URL: ${AZURE_STORAGE_PUBLIC_ENDPOINT_URL:-http://localhost:10000/devstoreaccount1}
 
     ports:
-      - "${REMOTE_SERVER_PORTS:-127.0.0.1:3000:8081}"
+      - "${REMOTE_SERVER_PORTS:-0.0.0.0:3000:8081}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8081/v1/health"]
@@ -146,7 +147,7 @@ services:
       RELAY_LISTEN_ADDR: 0.0.0.0:8082
       VIBEKANBAN_REMOTE_JWT_SECRET: ${VIBEKANBAN_REMOTE_JWT_SECRET:?set in .env.remote}
     ports:
-      - "127.0.0.1:8082:8082"
+      - "0.0.0.0:8082:8082"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8082/health"]
