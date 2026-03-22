@@ -16,7 +16,7 @@ bindings/
 
 # Environment variables
 .env
-.env.remote
+# .env.remote
 .env.local
 .env.development.local
 .env.test.local
