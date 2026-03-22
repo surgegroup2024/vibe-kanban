@@ -4,33 +4,38 @@ The `remote` crate contains the implementation of the Vibe Kanban hosted API.
 
 ## Prerequisites
 
-Create a `.env.remote` file in `crates/remote/` (this matches `pnpm run remote:dev`):
+Two env files are provided — use the one that matches your environment:
 
-```env
-# Required — generate with: openssl rand -base64 48
-VIBEKANBAN_REMOTE_JWT_SECRET=your_base64_encoded_secret
+| File | Use for |
+|------|---------|
+| `.env.remote.local` | Local development (localhost) |
+| `.env.remote` | EC2 / production (custom domain + HTTPS) |
 
-# Required — password for the electric_sync database role used by ElectricSQL
-ELECTRIC_ROLE_PASSWORD=your_secure_password
+### Local development — `.env.remote.local`
 
-# OAuth — at least one provider (GitHub or Google) must be configured
-GITHUB_OAUTH_CLIENT_ID=your_github_web_app_client_id
-GITHUB_OAUTH_CLIENT_SECRET=your_github_web_app_client_secret
-GOOGLE_OAUTH_CLIENT_ID=
-GOOGLE_OAUTH_CLIENT_SECRET=
+A pre-configured `.env.remote.local` file is included in `crates/remote/`. Copy it to `.env.remote` before running:
 
-# Relay (required for tunnel/relay features)
-# For local HTTPS via Caddy on :3001:
-VITE_RELAY_API_BASE_URL=https://relay.localhost:3001
-
-# Optional — enables Virtuoso Message List license for remote web UI
-VITE_PUBLIC_REACT_VIRTUOSO_LICENSE_KEY=
-
-# Optional — leave empty to disable invitation emails
-LOOPS_EMAIL_API_KEY=
+```bash
+cp crates/remote/.env.remote.local crates/remote/.env.remote
 ```
 
-Generate `VIBEKANBAN_REMOTE_JWT_SECRET` once using `openssl rand -base64 48` and copy the value into `.env.remote`.
+Then fill in your OAuth credentials and you're ready. Key local values:
+
+```env
+# Plain HTTP — no Caddy needed (quick start)
+PUBLIC_BASE_URL=http://localhost:3000
+VITE_RELAY_API_BASE_URL=http://localhost:8082
+AZURE_STORAGE_PUBLIC_ENDPOINT_URL=http://localhost:10000/devstoreaccount1
+```
+
+Or switch to local HTTPS via Caddy (see [Local HTTPS with Caddy](#local-https-with-caddy) below) by using:
+
+```env
+PUBLIC_BASE_URL=https://localhost:3001
+VITE_RELAY_API_BASE_URL=https://relay.localhost:3001
+```
+
+Generate `VIBEKANBAN_REMOTE_JWT_SECRET` once using `openssl rand -base64 48` and set it in the file.
 
 ## Run the stack locally
 
